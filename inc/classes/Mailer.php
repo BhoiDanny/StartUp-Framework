@@ -1,8 +1,6 @@
-<?php /** @noinspection PhpUndefinedConstantInspection */
+<?php /** @noinspection DuplicatedCode */
+   /** //@noinspection PhpMultipleClassDeclarationsInspection */
 
-   namespace SannyTech;
-
-   use http\Header;
    use PHPMailer\PHPMailer\PHPMailer;
 
    use PHPMailer\PHPMailer\SMTP;
@@ -15,17 +13,31 @@
 
    use League\OAuth2\Client\Grant\RefreshToken;
 
+
    class Mailer extends PHPMailer
    {
-      private static string $PHPMailer    = PHPMailer::class;
-      private static string $SMTP         = SMTP::class;
-      private static string $OAuth        = OAuth::class;
-      private static string $Exception    = Exception::class;
-      private static string $Google       = Google::class;
-      private static string $RefreshToken = RefreshToken::class;
+
+      private static $PHPMailer    = PHPMailer::class;
+      private static $SMTP         = SMTP::class;
+      private static $OAuth        = OAuth::class;
+      private static $Exception    = Exception::class;
+      private static $Google       = Google::class;
+      private static $RefreshToken = RefreshToken::class;
+
 
       private $mail;
-      public string $error;
+      public $error;
+      private $host = MAIL_HOST;
+      private $port = MAIL_PORT;
+      private $secure;
+      private $auth = MAIL_AUTH;
+      public $email = MAIL_EMAIL;
+      private $username = MAIL_USERNAME;
+      private $clientId = MAIL_CLIENT_ID;
+      private $clientSecret = MAIL_CLIENT_SECRET;
+      private $refreshToken = MAIL_REFRESH_TOKEN;
+
+
 
       public function __construct($bool=false)
       {
@@ -33,42 +45,51 @@
 
             parent::__construct();
 
+            //require(VENDOR_PATH.DS.'autoload.php');
+
             $this->mail = new static::$PHPMailer($bool);
             $this->mail->isSMTP();
-            $this->mail->Host       = Helper::env('MAIL_HOST');
-            $this->mail->Port       = Helper::env('MAIL_PORT');
+            $this->mail->Host = $this->host;
+            $this->mail->Port = $this->port;
             $this->mail->SMTPSecure = $this->mail::ENCRYPTION_SMTPS;
-            $this->mail->AuthType   = Helper::env('MAIL_AUTH');
-            $this->mail->SMTPAuth   = true;
+            $this->mail->SMTPAuth = true;
 
-            $provider = new static::$Google(
-               [
-                  'clientId' => Helper::env('MAIL_CLIENT_ID'),
-                  'clientSecret' => Helper::env('MAIL_CLIENT_SECRET'),
-               ]
-            );
-
-//            $grant = new static::$RefreshToken();
-//
-//            $token = $provider->getAccessToken(
-//                $grant, [
-//                    'refresh_token' => Helper::env("MAIL_REFRESH_TOKEN"),
-//                ]
-//            );
-
-            $this->mail->setOAuth(
-               new OAuth(
+            if(\SannyTech\Helper::env('MAIL_GMAIL_AUTH')){
+               //#
+               $this->mail->AuthType = $this->auth;
+               $provider = new static::$Google(
                   [
-                     'provider' => $provider,
-                     'clientId' => Helper::env('MAIL_CLIENT_ID'),
-                     'clientSecret' => Helper::env('MAIL_CLIENT_SECRET'),
-                     'refreshToken' => Helper::env('MAIL_REFRESH_TOKEN'),
+                     'clientId' => $this->clientId,
+                     'clientSecret' => $this->clientSecret,
+                  ]
+               );
+
+               if(\SannyTech\Helper::env('MAIL_REFRESH_TOKEN_STAT')) {
+                  $grant = new static::$RefreshToken();
+
+                  $token = $provider->getAccessToken(
+                     $grant, [
+                        'refresh_token' => $this->refreshToken,
+                     ]
+                  );
+               }
+
+               $this->mail->setOAuth(
+                  new OAuth(
+                     [
+                        'provider' => $provider,
+                        'clientId' => $this->clientId,
+                        'clientSecret' => $this->clientSecret,
+                        'refreshToken' => $this->refreshToken,
 //                        'accessToken' => $token->getToken(),
 //                        'redirectUri' => 'http://localhost:3002/inc/get_oauth_token.php',
-                     'userName' => Helper::env('MAIL_USERNAME'),
-                  ]
-               )
-            );
+                        'userName' => $this->username,
+                     ]
+                  )
+               );
+
+            }
+
 
          } catch(Exception $e){
             $this->error = "Working Here" . $e->getMessage() . " " . $e->getCode();
@@ -82,7 +103,7 @@
 
       public function from($name=""){
          try {
-            $this->mail->setFrom(Helper::env('MAIL_EMAIL'),$name);
+            $this->mail->setFrom($this->email,$name);
          } catch(\Exception $e) {
             $this->error = $e->getMessage() . " " . $e->getCode();
          }
@@ -179,5 +200,8 @@
       public function __toString() {
          return $this->error;
       }
+
+
+
 
    }

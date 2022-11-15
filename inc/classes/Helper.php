@@ -2,6 +2,7 @@
 
    namespace SannyTech;
 
+   use Exception;
    use JetBrains\PhpStorm\NoReturn;
 
    class Helper
@@ -420,8 +421,192 @@
          return $randomString;
       }
 
+      /**
+       * Create a folder
+       * @param string $path
+       * @return bool
+       */
+      public static function createDir(string $path=''): bool
+      {
+         if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+            return true;
+         }
+         return false;
+      }
 
+      /**
+       * Delete a folder and all its content
+       * @param string $path
+       * @return bool
+       */
+      public static function deleteDir(string $path=''): bool
+      {
+         if(!file_exists($path) || !is_dir($path)) {
+            return false;
+         } else {
+            $files = glob($path . '/*');
+            foreach($files as $file) {
+               if(is_dir($file)) {
+                  static::deleteDir($file);
+               }
+               unlink($file);
+            }
+            rmdir($path);
+            return true;
+         }
+      }
 
+      /**
+       * Create a file
+       * @param string $path
+       * @param string $content
+       * @return bool
+       * @throws Exception
+       */
+      public static function createFile(string $path='', string $content=''): bool
+      {
+         if (!file_exists($path)) {
+            $file = fopen($path, "w");
+            fwrite($file, $content);
+            fclose($file);
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Delete a file
+       * @param string $path
+       * @return bool
+       */
+      public static function deleteFile(string $path=''): bool
+      {
+         if (file_exists($path)) {
+            unlink($path);
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Get file content
+       * @param string $path
+       * @return string
+       */
+      public static function getFileContent(string $path=''): string
+      {
+         if (file_exists($path)) {
+            return file_get_contents($path);
+         }
+         return '';
+      }
+
+      /**
+       * Write content to a file
+       * @param string $path
+       * @param string $content
+       * @return bool
+       */
+      public static function writeFileContent(string $path='', string $content=''): bool
+      {
+         if (file_exists($path)) {
+            $file = fopen($path, "w");
+            fwrite($file, $content);
+            fclose($file);
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Append content to a file
+       * @param string $path
+       * @param string $content
+       * @return bool
+       */
+      public static function appendFileContent(string $path='', string $content=''): bool
+      {
+         if (file_exists($path)) {
+            $file = fopen($path, "a");
+            fwrite($file, $content);
+            fclose($file);
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Get file size
+       * @param string $path
+       * @return int
+       */
+      public static function getFileSize(string $path=''): int
+      {
+         if (file_exists($path)) {
+            return filesize($path);
+         }
+         return 0;
+      }
+
+      /**
+       * Get file extension
+       * @param string $path
+       * @return string
+       */
+      public static function getFileExtension(string $path=''): string
+      {
+         if (file_exists($path)) {
+            return pathinfo($path, PATHINFO_EXTENSION);
+         }
+         return '';
+      }
+
+      /**
+       * Hash a string
+       * @param string $string
+       * @return string
+       */
+      public static function hashString(string $string='') : string
+      {
+         return password_hash($string, PASSWORD_DEFAULT);
+      }
+
+      /**
+       * Verify a hashed string
+       * @param string $string
+       * @param string $hash
+       * @return bool
+       */
+      public static function verifyHash(string $string='', string $hash='') : bool
+      {
+         return password_verify($string, $hash);
+      }
+
+      /**
+       * Get the current URL
+       * @return string
+       */
+      public static function getCurrentUrl() : string
+      {
+         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http';
+         $host = $_SERVER['HTTP_HOST'];
+         $uri = $_SERVER['REQUEST_URI'];
+         return $protocol . '://' . $host . $uri;
+      }
+
+      /**
+       * Get the current URL without the query string
+       * @return string
+       */
+      public static function getCurrentUrlWithoutQueryString() : string
+      {
+         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http';
+         $host = $_SERVER['HTTP_HOST'];
+         $uri = $_SERVER['REQUEST_URI'];
+         $uri = explode('?', $uri);
+         return $protocol . '://' . $host . $uri[0];
+      }
 
 
 

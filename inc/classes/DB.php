@@ -2,6 +2,7 @@
 
    namespace SannyTech;
 
+   use Exception;
    use PDO;
    use PDOException;
 
@@ -31,14 +32,46 @@
       /**
        * DB constructor.
        * @param bool $connection
+       * @throws Exception
        */
       public function __construct(bool $connection = false)
       {
-         $this->dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName};charset={$this->charset}";
-         if(!$connection) {
-            $this->readConnect();
+         if(Helper::env('DB_MODEL') == 'sqlite') {
+            if(!file_exists(Helper::env('SQLITE_DB_DIR'))) {
+               if(Helper::createDir(Helper::env('SQLITE_DB_DIR'))) {
+                  Helper::createFile(Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME'));
+               }
+            } else {
+               if(!file_exists(Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME'))) {
+                  if(Helper::createFile(Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME'))){
+                     $this->dsn = "sqlite:" . Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME');
+                     $this->connect();
+                  }
+               } else {
+                  $this->dsn = "sqlite:" . Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME');
+                  $this->connect();
+               }
+            }
+
          } else {
-            $this->writeConnect();
+            $this->dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName};charset={$this->charset}";
+            if(!$connection) {
+               $this->readConnect();
+            } else {
+               $this->writeConnect();
+            }
+            echo "MySQL Database Connected";
+         }
+
+      }
+
+      private function connect(): void
+      {
+         try {
+            $this->db = new PDO($this->dsn , null, null, $this->options);
+         } catch(PDOException $e) {
+            $this->error = $e->getMessage();
+            die($this->error);
          }
       }
 

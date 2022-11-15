@@ -1,5 +1,5 @@
 <?php
    /*Object Instantiation*/
 
-   $db = new \SannyTech\DBe();
+   $db = new \SannyTech\DB();
    $session = new \SannyTech\Session();
