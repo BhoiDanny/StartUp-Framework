@@ -40,6 +40,7 @@
          if($user) {
             $this->user_id = $_SESSION['user_id'] = $user->id;
             $this->signedIn = true;
+            $this->setTime();
          }
       }
 
@@ -66,6 +67,37 @@
          } else {
             unset($this->user_id);
             $this->signedIn = false;
+         }
+      }
+
+      /**
+       * Set Session time
+       * @return void
+       */
+      private function setTime(): void
+      {
+         $_SESSION['time'] = time();
+      }
+
+      /**
+       * Get Session time
+       * @return mixed
+       */
+      private function getTime(): mixed
+      {
+         return $_SESSION['time'];
+      }
+
+      /**
+       * Check if time is expired
+       * @return bool
+       */
+      public function isExpired(): bool
+      {
+         if($this->getTime() + Helper::env('SESSION_LIFETIME') < time()) {
+            return true;
+         } else {
+            return false;
          }
       }
 
@@ -97,7 +129,7 @@
          }
       }
 
-/**
+      /**
        * Save an id
        * @param string $id
        * @return string

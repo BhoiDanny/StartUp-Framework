@@ -4,79 +4,96 @@
 
    class Cookie
    {
-      public mixed $value;
-      public string $name;
-      public int $expiry;
-      public string $path;
-      public string $domain;
-      public bool $secure;
-      public bool $httpOnly;
+      public $user_id;
+      private $signedIn = false;
+      private $name;
 
       /**
        * Cookie Constructor
-       * @param $name
-       * @param string $value
-       * @param int $expiry
-       * @param string $path
-       * @param string $domain
-       * @param bool $secure
-       * @param bool $httpOnly
        * @return void
        */
-      public function __construct(
-         $name,
-         string $value = '',
-         int $expiry = 0,
-         string $path = '',
-         string $domain = '',
-         bool $secure = false,
-         bool $httpOnly = true,
-      )
+      public function __construct()
       {
-         $this->name = $name;
-         $this->value = $value;
-         $this->expiry = $expiry;
-         $this->path = $path;
-         $this->domain = $domain;
-         $this->secure = $secure;
-         $this->httpOnly = $httpOnly;
-
+         $this->name = Helper::env('COOKIE_NAME');
+         $this->checkLogin();
       }
 
       /**
-       * Set a cookie
+       * Check if user is logged in
+       * @return bool
+       */
+      public function isSignedIn(): bool
+      {
+         return $this->signedIn;
+      }
+
+
+      /**
+       * Set SignIn cookie
+       * @param $user
        * @return void
        */
-      public function set(): void
+      public function setCookie($user): void
       {
-         setcookie(
-            $this->name,
-            $this->value,
-            $this->expiry,
-            $this->path,
-            $this->domain,
-            $this->secure,
-            $this->httpOnly
-         );
+         if($user) {
+            $cookie = Helper::encrypt($user->id);
+            setcookie($this->name, $cookie, time() + Helper::env('COOKIE_EXPIRY'), '/');
+         }
       }
 
       /**
-       * Get a cookie
-       * @return mixed
+       * SignIn with cookie
+       * @param $user
+       * @return void
        */
-      public function get(): mixed
+      public function signIn($user):void
       {
-         return $_COOKIE[$this->name];
+         if($user) {
+            $this->user_id = $_SESSION[$this->name] = $user->id;
+            $this->signedIn = true;
+         }
       }
 
       /**
-       * Delete a cookie
+       * Check if user is logged in using cookie
        * @return void
        */
-      public function delete(): void
+      private function checkLogin(): void
       {
-         $this->expiry = time() - 3600;
-         $this->set();
+         if(Helper::cookie($this->name) !== null) {
+            $cookie = Helper::decrypt(Helper::cookie($this->name));
+            $this->user_id = $_SESSION['user_id'] = $cookie;
+            $this->signedIn = true;
+         } else {
+            unset($this->user_id);
+            $this->signedIn = false;
+         }
+      }
+
+      /**
+       * Log user out using cookie
+       * @return void
+       */
+      public function signOut(): void
+      {
+         unset($_SESSION['user_id']);
+         unset($this->user_id);
+         $this->signedIn = false;
+         $this->destroyCookie($this->name);
+      }
+
+      /**
+       * Destroy a cookie
+       * @param string $cookieName
+       * @return void
+       */
+      public function destroyCookie(string $cookieName): void
+      {
+         $this->name = $cookieName;
+         if($this->exists()) {
+            unset($_COOKIE[$this->name]);
+            setcookie($this->name, '', time() - 3600, '/');
+         }
       }
 
       /**

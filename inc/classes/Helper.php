@@ -22,7 +22,7 @@
 
       public static function productionErrorPage()
       {
-         return require_once 'inc/errors/production.php';
+         return require_once 'manager/errors/production.php';
       }
 
       /**
@@ -196,12 +196,39 @@
          return base64_encode($output);
       }
 
-      /*Decrypt*/
-      public static function decrypt($string): string
+      /*EncryptValue*/
+      public static function encryptValue($data, $encrypt_key): string
       {
          $output = false;
          $encrypt_method = "AES-256-CBC";
+         $secret_key = $encrypt_key;
+         $secret_iv = '1234567890123456';
+         //hash
+         $key = hash('sha256', $secret_key);
+         // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+         $iv = substr(hash('sha256', $secret_iv), 0, 16);
+         $output = openssl_encrypt($data, $encrypt_method, $key, 0, $iv);
+         return base64_encode($output);
+      }
+
+      /*Decrypt*/
+      public static function decrypt($string): string
+      {
+         $encrypt_method = "AES-256-CBC";
          $secret_key = static::env('APP_SECRET_KEY');
+         $secret_iv = '1234567890123456';
+         // hash
+         $key = hash('sha256', $secret_key);
+         // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+         $iv = substr(hash('sha256', $secret_iv), 0, 16);
+         return openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+      }
+
+      /*Decrypt Url*/
+      public static function decryptValue($string, $decrypt_key): string
+      {
+         $encrypt_method = "AES-256-CBC";
+         $secret_key = $decrypt_key;
          $secret_iv = '1234567890123456';
          // hash
          $key = hash('sha256', $secret_key);
@@ -422,6 +449,17 @@
       }
 
       /**
+       * Generate Token
+       * @param int $int
+       * @return string
+       * @throws Exception
+       */
+      public static function generateToken(int $int=32): string
+      {
+         return bin2hex(random_bytes($int));
+      }
+
+      /**
        * Create a folder
        * @param string $path
        * @return bool
@@ -569,7 +607,7 @@
        */
       public static function hashString(string $string='') : string
       {
-         return password_hash($string, PASSWORD_DEFAULT);
+         return password_hash($string, PASSWORD_BCRYPT, array('cost' => 10));
       }
 
       /**
@@ -608,6 +646,213 @@
          return $protocol . '://' . $host . $uri[0];
       }
 
+      /**
+       * Break name into pieces and store them in an array
+       * @param string $name
+       * @return array
+       */
+      public static function breakName(string $name='') : array
+      {
+         $name = strtolower($name);
+         $name = explode(' ', $name);
+         $name = array_filter($name);
+         $name = array_values($name);
+         foreach($name as $key => $value) {
+            $name[$key] = ucfirst($value);
+         }
+         for($i = 0; $i < count($name); $i++) {
+            if($i == 0) {
+               $name['first_name'] = $name[$i];
+               unset($name[$i]);
+            } else if($i == 1) {
+               $name['last_name'] = $name[$i];
+               unset($name[$i]);
+            } else if($i == 2) {
+               $name['middle_name'] = $name[$i];
+               unset($name[$i]);
+            }
+         }
+         return $name;
+      }
 
+      /**
+       * Check if is Email
+       * @param string $email
+       * @return bool
+       */
+      public static function isEmail(string $email='') : bool
+      {
+         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Check Email Provider
+       * @param string $email
+       * @param string $provider
+       * @return bool
+       */
+      public static function checkEmailProvider(string $email='', string $provider='') : bool
+      {
+         $email = explode('@', $email);
+         $email = end($email);
+         if($email == $provider) {
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Check if Token Match
+       * @param string $token
+       * @return bool
+       */
+      public static function isBinMatch(string $token='') : bool
+      {
+         if(ctype_xdigit($token)){
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * Expose Php in Ini
+       * @return void
+       */
+      public function exposePhp(): void
+      {
+         ini_set('expose_php', 'On');
+      }
+
+      /**
+       * Set Time Zone
+       * @param string $timezone
+       * @return void
+       */
+      public static function setTimeZone(string $timezone='UTC'): void
+      {
+         date_default_timezone_set($timezone);
+      }
+
+      /**
+       * Set Php Max Execution Time
+       * @param int $time
+       * @return void
+       */
+      public static function setMaxExecTime(int $time=30): void
+      {
+         ini_set('max_execution_time', $time);
+      }
+
+      /**
+       * Set Php Max Input Time
+       * @param int $time
+       * @return void
+       */
+      public static function setMaxInputTime(int $time=60):void
+      {
+         ini_set('max_input_time', $time);
+      }
+
+      /**
+       * Set Php Memory Limit
+       * @param int $memory
+       * @return void
+       */
+      public static function setMemoryLimit(int $memory=128): void
+      {
+         ini_set('memory_limit', $memory . 'M');
+      }
+
+      /**
+       * Set Php Post Max Size
+       * @param int $size
+       * @return void
+       */
+      public static function setPostMaxSize(int $size=8): void
+      {
+         ini_set('post_max_size', $size . 'M');
+      }
+
+      /**
+       * Set Php Upload Max File Size
+       * @param int $size
+       * @return void
+       */
+      public static function setUploadMaxFileSize(int $size=2): void
+      {
+         ini_set('upload_max_filesize', $size . 'M');
+      }
+
+      /**
+       * Set Php Max File Uploads
+       * @param int $files
+       * @return void
+       */
+      public static function setMaxFileUploads(int $files=20): void
+      {
+         ini_set('max_file_uploads', $files);
+      }
+
+      /**
+       * Set Php Max Input Vars
+       * @param int $vars
+       * @return void
+       */
+      public static function setMaxInputVars(int $vars=1000): void
+      {
+         ini_set('max_input_vars', $vars);
+      }
+
+      /**
+       * Set Php Display Errors
+       * @param bool $display
+       * @return void
+       */
+      public static function setDisplayErrors(bool $display=false): void
+      {
+         ini_set('display_errors', $display);
+      }
+
+      /**
+       * Set Php Display Startup Errors
+       * @param bool $display
+       * @return void
+       */
+      public static function setDisplayStartupErrors(bool $display=false): void
+      {
+         ini_set('display_startup_errors', $display);
+      }
+
+      /**
+       * Set Php Log Errors
+       * @param bool $log
+       * @return void
+       */
+      public static function setLogErrors(bool $log=false): void
+      {
+         ini_set('log_errors', $log);
+      }
+
+      /**
+       * Log Error
+       * @param string $message
+       * @param Exception $error
+       * @param int $type
+       * @param string $destination
+       * @return void
+       */
+      public static function logError(
+         Exception $error,
+         string $message = '',
+         int $type=0,
+         string $destination='error.log'
+      ):void
+      {
+         $log = 'Error: ' . date('Y-m-d H:i:s') . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
+         error_log($log, $type, $destination);
+      }
 
    }
