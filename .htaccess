@@ -1,0 +1,961 @@
+# ######################################################################
+# # CROSS-ORIGIN                                                       #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Cross-origin requests                                              |
+# ----------------------------------------------------------------------
+
+# Allow cross-origin requests.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+# https://enable-cors.org/
+# https://www.w3.org/TR/cors/
+
+# (!) Do not use this without understanding the consequences.
+#     This will permit access from any other website.
+#     Instead of using this file, consider using a specific rule such as
+#     allowing access based on (sub)domain:
+#
+#         Header set Access-Control-Allow-Origin "subdomain.example.com"
+
+# <IfModule mod_headers.c>
+#     Header set Access-Control-Allow-Origin "*"
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Cross-origin images                                                |
+# ----------------------------------------------------------------------
+
+# Send the CORS header for images when browsers request it.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
+# https://blog.chromium.org/2011/07/using-cross-domain-images-in-webgl-and.html
+
+#<IfModule mod_setenvif.c>
+#    <IfModule mod_headers.c>
+#        <FilesMatch "\.(bmp|cur|gif|ico|jpe?g|a?png|svgz?|webp)$">
+#            SetEnvIf Origin ":" IS_CORS
+#            Header set Access-Control-Allow-Origin "*" env=IS_CORS
+#        </FilesMatch>
+#    </IfModule>
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Cross-origin web fonts                                             |
+# ----------------------------------------------------------------------
+
+# Allow cross-origin access to web fonts.
+#
+# https://developers.google.com/fonts/docs/troubleshooting
+
+#<IfModule mod_headers.c>
+#    <FilesMatch "\.(eot|otf|tt[cf]|woff2?)$">
+#        Header set Access-Control-Allow-Origin "barter.sanny.tech"
+#    </FilesMatch>
+#</IfModule>
+
+# ######################################################################
+# # INTERNET EXPLORER                                                  #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Document modes                                                     |
+# ----------------------------------------------------------------------
+
+# Force Internet Explorer 8/9/10 to render pages in the highest mode
+# available in various cases when it may not.
+#
+# https://hsivonen.fi/doctype/#ie8
+#
+# (!) Starting with Internet Explorer 11, document modes are deprecated.
+#     If your business still relies on older web apps and services that were
+#     designed for older versions of Internet Explorer, you might want to
+#     consider enabling `Enterprise Mode` throughout your company.
+#
+# https://msdn.microsoft.com/en-us/library/ie/bg182625.aspx#docmode
+# https://blogs.msdn.microsoft.com/ie/2014/04/02/stay-up-to-date-with-enterprise-mode-for-internet-explorer-11/
+# https://msdn.microsoft.com/en-us/library/ff955275.aspx
+
+#<IfModule mod_headers.c>
+#    Header always set X-UA-Compatible "IE=edge" "expr=%{CONTENT_TYPE} =~ m#text/html#i"
+#</IfModule>
+
+# ######################################################################
+# # ERRORS                                                             #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Custom error messages/pages                                        |
+# ----------------------------------------------------------------------
+
+# Customize what Apache returns to the client in case of an error.
+#
+# https://httpd.apache.org/docs/current/mod/core.html#errordocument
+
+#ErrorDocument 404 /404.html
+
+# ----------------------------------------------------------------------
+# | Error prevention                                                   |
+# ----------------------------------------------------------------------
+
+# Disable the pattern matching based on filenames.
+#
+# This setting prevents Apache from returning a 404 error as the result of a
+# rewrite when the directory with the same name does not exist.
+#
+# https://httpd.apache.org/docs/current/content-negotiation.html#multiviews
+
+##Flags For GoDaddy
+#Options -MultiViews
+#Options +MultiViews
+
+# ######################################################################
+# # MEDIA TYPES AND CHARACTER ENCODINGS                                #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Media types                                                        |
+# ----------------------------------------------------------------------
+
+# Serve resources with the proper media types (f.k.a. MIME types).
+#
+# https://www.iana.org/assignments/media-types/media-types.xhtml
+# https://httpd.apache.org/docs/current/mod/mod_mime.html#addtype
+
+#<IfModule mod_mime.c>
+#
+#  # Data interchange
+#
+#    AddType application/atom+xml                        atom
+#    AddType application/json                            json map topojson
+#    AddType application/ld+json                         jsonld
+#    AddType application/rss+xml                         rss
+#    AddType application/geo+json                        geojson
+#    AddType application/rdf+xml                         rdf
+#    AddType application/xml                             xml
+#
+#
+#  # JavaScript
+#
+#    # Servers should use text/javascript for JavaScript resources.
+#    # https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages
+#
+#    AddType text/javascript                             js mjs
+#
+#
+#  # Manifest files
+#
+#    AddType application/manifest+json                   webmanifest
+#    AddType application/x-web-app-manifest+json         webapp
+#    AddType text/cache-manifest                         appcache
+#
+#
+#  # Media files
+#
+#    AddType audio/mp4                                   f4a f4b m4a
+#    AddType audio/ogg                                   oga ogg opus
+#    AddType image/bmp                                   bmp
+#    AddType image/svg+xml                               svg svgz
+#    AddType image/webp                                  webp
+#    AddType video/mp4                                   f4v f4p m4v mp4
+#    AddType video/ogg                                   ogv
+#    AddType video/webm                                  webm
+#    AddType video/x-flv                                 flv
+#
+#    # Serving `.ico` image files with a different media type prevents
+#    # Internet Explorer from displaying them as images:
+#    # https://github.com/h5bp/html5-boilerplate/commit/37b5fec090d00f38de64b591bcddcb205aadf8ee
+#
+#    AddType image/x-icon                                cur ico
+#
+#
+#  # WebAssembly
+#
+#    AddType application/wasm                            wasm
+#
+#
+#  # Web fonts
+#
+#    AddType font/woff                                   woff
+#    AddType font/woff2                                  woff2
+#    AddType application/vnd.ms-fontobject               eot
+#    AddType font/ttf                                    ttf
+#    AddType font/collection                             ttc
+#    AddType font/otf                                    otf
+#
+#
+#  # Other
+#
+#    AddType application/octet-stream                    safariextz
+#    AddType application/x-bb-appworld                   bbaw
+#    AddType application/x-chrome-extension              crx
+#    AddType application/x-opera-extension               oex
+#    AddType application/x-xpinstall                     xpi
+#    AddType text/calendar                               ics
+#    AddType text/markdown                               markdown md
+#    AddType text/vcard                                  vcard vcf
+#    AddType text/vnd.rim.location.xloc                  xloc
+#    AddType text/vtt                                    vtt
+#    AddType text/x-component                            htc
+#
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Character encodings                                                |
+# ----------------------------------------------------------------------
+
+# Serve all resources labeled as `text/html` or `text/plain` with the media type
+# `charset` parameter set to `UTF-8`.
+#
+# https://httpd.apache.org/docs/current/mod/core.html#adddefaultcharset
+
+#AddDefaultCharset utf-8
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Serve the following file types with the media type `charset` parameter set to
+# `UTF-8`.
+#
+# https://httpd.apache.org/docs/current/mod/mod_mime.html#addcharset
+
+#<IfModule mod_mime.c>
+#    AddCharset utf-8 .appcache \
+#                     .bbaw \
+#                     .css \
+#                     .htc \
+#                     .ics \
+#                     .js \
+#                     .json \
+#                     .manifest \
+#                     .map \
+#                     .markdown \
+#                     .md \
+#                     .mjs \
+#                     .topojson \
+#                     .vtt \
+#                     .vcard \
+#                     .vcf \
+#                     .webmanifest \
+#                     .xloc
+#</IfModule>
+
+# ######################################################################
+# # REWRITES                                                           #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Rewrite engine                                                     |
+# ----------------------------------------------------------------------
+
+# (1) Turn on the rewrite engine (this is necessary in order for the
+#     `RewriteRule` directives to work).
+#
+#     https://httpd.apache.org/docs/current/mod/mod_rewrite.html#RewriteEngine
+#
+# (2) Enable the `FollowSymLinks` option if it isn't already.
+#
+#     https://httpd.apache.org/docs/current/mod/core.html#options
+#
+# (3) If your web host doesn't allow the `FollowSymlinks` option, you need to
+#     comment it out or remove it, and then uncomment the
+#     `Options +SymLinksIfOwnerMatch` line (4), but be aware of the performance
+#     impact.
+#
+#     https://httpd.apache.org/docs/current/misc/perf-tuning.html#symlinks
+#
+# (4) Some cloud hosting services will require you set `RewriteBase`.
+#
+#     https://www.rackspace.com/knowledge_center/frequently-asked-question/why-is-modrewrite-not-working-on-my-site
+#     https://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewritebase
+#
+# (5) Depending on how your server is set up, you may also need to use the
+#     `RewriteOptions` directive to enable some options for the rewrite engine.
+#
+#     https://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewriteoptions
+
+#<IfModule mod_rewrite.c>
+#
+#    # (1)
+#    RewriteEngine On
+#
+#    # (2)
+#    Options +FollowSymlinks
+#
+#    # (3)
+#    # Options +SymLinksIfOwnerMatch
+#
+#    # (4)
+#    #RewriteBase /
+#
+#    # (5)
+#    # RewriteOptions <options>
+#
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Removing Extensions                                                   |
+# ----------------------------------------------------------------------
+    # (1) Remove .html from the end of URLs.
+#    RewriteEngine On
+#    RewriteCond %{REQUEST_FILENAME} !-f
+#    RewriteRule ^([^.]+)$ $1.html [NC,L]
+#
+#    # (2) Removing .html from URL and Redirecting to non .html URL
+#    RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
+#    RewriteRule ^ /%1 [R=301,NE,L]
+
+# ######################################################################
+# # SECURITY                                                           #
+# ######################################################################
+# ----------------------------------------------------------------------
+# | Frame Options                                                      |
+# ----------------------------------------------------------------------
+
+# Protect website against clickjacking.
+#
+# The example below sends the `X-Frame-Options` response header with the value
+# `DENY`, informing browsers not to display the content of the web page in any
+# frame.
+#
+# This might not be the best setting for everyone. You should read about the
+# other two possible values the `X-Frame-Options` header field can have:
+# `SAMEORIGIN` and `ALLOW-FROM`.
+# https://tools.ietf.org/html/rfc7034#section-2.1.
+#
+# Keep in mind that while you could send the `X-Frame-Options` header for all
+# of your website's pages, this has the potential downside that it forbids even
+# non-malicious framing of your content (e.g.: when users visit your website
+# using a Google Image Search results page).
+#
+# Nonetheless, you should ensure that you send the `X-Frame-Options` header for
+# all pages that allow a user to make a state-changing operation (e.g: pages
+# that contain one-click purchase links, checkout or bank-transfer confirmation
+# pages, pages that make permanent configuration changes, etc.).
+#
+# Sending the `X-Frame-Options` header can also protect your website against
+# more than just clickjacking attacks.
+# https://cure53.de/xfo-clickjacking.pdf.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+# https://tools.ietf.org/html/rfc7034
+# https://blogs.msdn.microsoft.com/ieinternals/2010/03/30/combating-clickjacking-with-x-frame-options/
+# https://www.owasp.org/index.php/Clickjacking
+
+# <IfModule mod_headers.c>
+#     Header always set X-Frame-Options "DENY" "expr=%{CONTENT_TYPE} =~ m#text/html#i"
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Content Security Policy (CSP)                                      |
+# ----------------------------------------------------------------------
+
+# Mitigate the risk of cross-site scripting and other content-injection
+# attacks.
+#
+# This can be done by setting a `Content Security Policy` which whitelists
+# trusted sources of content for your website.
+#
+# There is no policy that fits all websites, you will have to modify the
+# `Content-Security-Policy` directives in the example depending on your needs.
+#
+# The example policy below aims to:
+#
+#  (1) Restrict all fetches by default to the origin of the current website by
+#      setting the `default-src` directive to `'self'` - which acts as a
+#      fallback to all "Fetch directives" (https://developer.mozilla.org/en-US/docs/Glossary/Fetch_directive).
+#
+#      This is convenient as you do not have to specify all Fetch directives
+#      that apply to your site, for example:
+#      `connect-src 'self'; font-src 'self'; script-src 'self'; style-src 'self'`, etc.
+#
+#      This restriction also means that you must explicitly define from which
+#      site(s) your website is allowed to load resources from.
+#
+#  (2) The `<base>` element is not allowed on the website. This is to prevent
+#      attackers from changing the locations of resources loaded from relative
+#      URLs.
+#
+#      If you want to use the `<base>` element, then `base-uri 'self'` can be
+#      used instead.
+#
+#  (3) Form submissions are only allowed from the current website by setting:
+#      `form-action 'self'`.
+#
+#  (4) Prevents all websites (including your own) from embedding your webpages
+#      within e.g. the `<iframe>` or `<object>` element by setting:
+#      `frame-ancestors 'none'`.
+#
+#      The `frame-ancestors` directive helps avoid "Clickjacking" attacks and
+#      is similar to the `X-Frame-Options` header.
+#
+#      Browsers that support the CSP header will ignore `X-Frame-Options` if
+#      `frame-ancestors` is also specified.
+#
+#  (5) Forces the browser to treat all the resources that are served over HTTP
+#      as if they were loaded securely over HTTPS by setting the
+#      `upgrade-insecure-requests` directive.
+#
+#      Please note that `upgrade-insecure-requests` does not ensure HTTPS for
+#      the top-level navigation. If you want to force the website itself to be
+#      loaded over HTTPS you must include the `Strict-Transport-Security`
+#      header.
+#
+#  (6) The `Content-Security-Policy` header is included in all responses
+#      that are able to execute scripting. This includes the commonly used
+#      file types: HTML, XML and PDF documents. Although Javascript files
+#      can not execute script in a "browsing context", they are still included
+#      to target workers:
+#      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#CSP_in_workers
+#
+# To make your CSP implementation easier, you can use an online CSP header
+# generator such as:
+# https://report-uri.com/home/generate/
+#
+# It is encouraged that you validate your CSP header using a CSP validator
+# such as:
+# https://csp-evaluator.withgoogle.com
+#
+# https://csp.withgoogle.com/docs/
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+# https://www.html5rocks.com/en/tutorials/security/content-security-policy/
+# https://www.w3.org/TR/CSP/
+
+# <IfModule mod_headers.c>
+#     #                                   (1)                 (2)              (3)                 (4)                     (5)                         (6)
+#     Header always set Content-Security-Policy "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" "expr=%{CONTENT_TYPE} =~ m#text\/(html|javascript)|application\/pdf|xml#i"
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | File access                                                        |
+# ----------------------------------------------------------------------
+
+# Block access to directories without a default document.
+#
+# You should leave the following uncommented, as you shouldn't allow anyone to
+# surf through every directory on your server (which may include rather
+# private places such as the CMS's directories).
+
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Block access to all hidden files and directories except for the
+# visible content from within the `/.well-known/` hidden directory.
+#
+# These types of files usually contain user preferences or the preserved state
+# of a utility, and can include rather private places like, for example, the
+# `.git` or `.svn` directories.
+#
+# The `/.well-known/` directory represents the standard (RFC 5785) path prefix
+# for "well-known locations" (e.g.: `/.well-known/manifest.json`,
+# `/.well-known/keybase.txt`), and therefore, access to its visible content
+# should not be blocked.
+#
+# https://www.mnot.net/blog/2010/04/07/well-known
+# https://tools.ietf.org/html/rfc5785
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} "!(^|/)\.well-known/([^./]+./?)+$" [NC]
+    RewriteCond %{SCRIPT_FILENAME} -d [OR]
+    RewriteCond %{SCRIPT_FILENAME} -f
+    RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Block access to files that can expose sensitive information.
+#
+# By default, block access to backup and source files that may be left by some
+# text editors and can pose a security risk when anyone has access to them.
+#
+# https://feross.org/cmsploit/
+#
+# (!) Update the `<FilesMatch>` regular expression from below to include any
+#     files that might end up on your production server and can expose
+#     sensitive information about your website. These files may include:
+#     configuration files, files that contain metadata about the project (e.g.:
+#     project dependencies, build scripts, etc.).
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(^#.*#|\.(bak|conf|dist|fla|in[ci]|log|orig|psd|sh|sql|sw[op])|~)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Block access to files that can expose sensitive information.
+#
+# By default, block access to backup and source files that may be left by some
+# text editors and can pose a security risk when anyone has access to them.
+#
+# https://feross.org/cmsploit/
+#
+# (!) Update the `<FilesMatch>` regular expression from below to include any
+#     files that might end up on your production server and can expose
+#     sensitive information about your website. These files may include:
+#     configuration files, files that contain metadata about the project (e.g.:
+#     project dependencies, build scripts, etc.).
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(^#.*#|\.(bak|conf|dist|fla|in[ci]|log|orig|psd|sh|sql|sw[op])|~)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# ----------------------------------------------------------------------
+# | Content Type Options                                               |
+# ----------------------------------------------------------------------
+
+# Prevent some browsers from MIME-sniffing the response.
+#
+# This reduces exposure to drive-by download attacks and cross-origin data
+# leaks, and should be left uncommented, especially if the server is serving
+# user-uploaded content or content that could potentially be treated as
+# executable by the browser.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+# https://blogs.msdn.microsoft.com/ie/2008/07/02/ie8-security-part-v-comprehensive-protection/
+# https://mimesniff.spec.whatwg.org/
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# ----------------------------------------------------------------------
+# | Server-side technology information                                 |
+# ----------------------------------------------------------------------
+
+# Remove the `X-Powered-By` response header that:
+#
+#  * is set by some frameworks and server-side languages (e.g.: ASP.NET, PHP),
+#    and its value contains information about them (e.g.: their name, version
+#    number)
+#
+#  * doesn't provide any value to users, contributes to header bloat, and in
+#    some cases, the information it provides can expose vulnerabilities
+#
+# (!) If you can, you should disable the `X-Powered-By` header from the
+#     language/framework level (e.g.: for PHP, you can do that by setting
+#     `expose_php = off` in `php.ini`).
+#
+# https://php.net/manual/en/ini.core.php#ini.expose-php
+
+<IfModule mod_headers.c>
+    Header unset X-Powered-By
+    Header always unset X-Powered-By
+</IfModule>
+
+# ----------------------------------------------------------------------
+# | Server software information                                        |
+# ----------------------------------------------------------------------
+
+# Prevent Apache from adding a trailing footer line containing information
+# about the server to the server-generated documents (e.g.: error messages,
+# directory listings, etc.).
+#
+# https://httpd.apache.org/docs/current/mod/core.html#serversignature
+
+ServerSignature Off
+
+# ----------------------------------------------------------------------
+# | Cache expiration                                                   |
+# ----------------------------------------------------------------------
+
+# Serve resources with a far-future expiration date.
+#
+# (!) If you don't control versioning with filename-based cache busting, you
+# should consider lowering the cache times to something like one week.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+# https://httpd.apache.org/docs/current/mod/mod_expires.html
+
+#<IfModule mod_expires.c>
+#
+#    ExpiresActive on
+#    ExpiresDefault                                      "access plus 1 month"
+#
+#  # CSS
+#
+#    ExpiresByType text/css                              "access plus 1 year"
+#
+#
+#  # Data interchange
+#
+#    ExpiresByType application/atom+xml                  "access plus 1 hour"
+#    ExpiresByType application/rdf+xml                   "access plus 1 hour"
+#    ExpiresByType application/rss+xml                   "access plus 1 hour"
+#
+#    ExpiresByType application/json                      "access plus 0 seconds"
+#    ExpiresByType application/ld+json                   "access plus 0 seconds"
+#    ExpiresByType application/schema+json               "access plus 0 seconds"
+#    ExpiresByType application/geo+json                  "access plus 0 seconds"
+#    ExpiresByType application/xml                       "access plus 0 seconds"
+#    ExpiresByType text/calendar                         "access plus 0 seconds"
+#    ExpiresByType text/xml                              "access plus 0 seconds"
+#
+#
+#  # Favicon (cannot be renamed!) and cursor images
+#
+#    ExpiresByType image/vnd.microsoft.icon              "access plus 1 week"
+#    ExpiresByType image/x-icon                          "access plus 1 week"
+#
+#  # HTML
+#
+#    ExpiresByType text/html                             "access plus 0 seconds"
+#
+#
+#  # JavaScript
+#
+#    ExpiresByType application/javascript                "access plus 1 year"
+#    ExpiresByType application/x-javascript              "access plus 1 year"
+#    ExpiresByType text/javascript                       "access plus 1 year"
+#
+#
+#  # Manifest files
+#
+#    ExpiresByType application/manifest+json             "access plus 1 week"
+#    ExpiresByType application/x-web-app-manifest+json   "access plus 0 seconds"
+#    ExpiresByType text/cache-manifest                   "access plus 0 seconds"
+#
+#
+#  # Markdown
+#
+#    ExpiresByType text/markdown                         "access plus 0 seconds"
+#
+#
+#  # Media files
+#
+#    ExpiresByType audio/ogg                             "access plus 1 month"
+#    ExpiresByType image/apng                            "access plus 1 month"
+#    ExpiresByType image/bmp                             "access plus 1 month"
+#    ExpiresByType image/gif                             "access plus 1 month"
+#    ExpiresByType image/jpeg                            "access plus 1 month"
+#    ExpiresByType image/png                             "access plus 1 month"
+#    ExpiresByType image/svg+xml                         "access plus 1 month"
+#    ExpiresByType image/webp                            "access plus 1 month"
+#    ExpiresByType video/mp4                             "access plus 1 month"
+#    ExpiresByType video/ogg                             "access plus 1 month"
+#    ExpiresByType video/webm                            "access plus 1 month"
+#
+#
+#  # WebAssembly
+#
+#    ExpiresByType application/wasm                      "access plus 1 year"
+#
+#
+#  # Web fonts
+#
+#    # Collection
+#    ExpiresByType font/collection                       "access plus 1 month"
+#
+#    # Embedded OpenType (EOT)
+#    ExpiresByType application/vnd.ms-fontobject         "access plus 1 month"
+#    ExpiresByType font/eot                              "access plus 1 month"
+#
+#    # OpenType
+#    ExpiresByType font/opentype                         "access plus 1 month"
+#    ExpiresByType font/otf                              "access plus 1 month"
+#
+#    # TrueType
+#    ExpiresByType application/x-font-ttf                "access plus 1 month"
+#    ExpiresByType font/ttf                              "access plus 1 month"
+#
+#    # Web Open Font Format (WOFF) 1.0
+#    ExpiresByType application/font-woff                 "access plus 1 month"
+#    ExpiresByType application/x-font-woff               "access plus 1 month"
+#    ExpiresByType font/woff                             "access plus 1 month"
+#
+#    # Web Open Font Format (WOFF) 2.0
+#    ExpiresByType application/font-woff2                "access plus 1 month"
+#    ExpiresByType font/woff2                            "access plus 1 month"
+#
+#
+#  # Other
+#
+#    ExpiresByType text/x-cross-domain-policy            "access plus 1 week"
+#
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Compression                                                         |
+# ----------------------------------------------------------------------
+# https://httpd.apache.org/docs/current/mod/mod_deflate.html
+
+#<IfModule mod_deflate.c>
+#    # Compress all output labeled with one of the following media types.
+#    AddOutputFilterByType DEFLATE application/atom+xml
+#    AddOutputFilterByType DEFLATE application/javascript
+#    AddOutputFilterByType DEFLATE application/json
+#    AddOutputFilterByType DEFLATE application/ld+json
+#    AddOutputFilterByType DEFLATE application/manifest+json
+#    AddOutputFilterByType DEFLATE application/rdf+xml
+#    AddOutputFilterByType DEFLATE application/rss+xml
+#    AddOutputFilterByType DEFLATE application/schema+json
+#    AddOutputFilterByType DEFLATE application/vnd.geo+json
+#    AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+#    AddOutputFilterByType DEFLATE application/x-font-ttf
+#    AddOutputFilterByType DEFLATE application/x-javascript
+#    AddOutputFilterByType DEFLATE application/x-web-app-manifest+json
+#    AddOutputFilterByType DEFLATE application/xhtml+xml
+#    AddOutputFilterByType DEFLATE application/xml
+#    AddOutputFilterByType DEFLATE font/eot
+#    AddOutputFilterByType DEFLATE font/opentype
+#    AddOutputFilterByType DEFLATE font/otf
+#    AddOutputFilterByType DEFLATE font/woff
+#    AddOutputFilterByType DEFLATE font/woff2
+#    AddOutputFilterByType DEFLATE image/bmp
+#    AddOutputFilterByType DEFLATE image/svg+xml
+#    AddOutputFilterByType DEFLATE image/x-icon
+#    AddOutputFilterByType DEFLATE text/cache-manifest
+#    AddOutputFilterByType DEFLATE text/css
+#    AddOutputFilterByType DEFLATE text/html
+#    AddOutputFilterByType DEFLATE text/javascript
+#    AddOutputFilterByType DEFLATE text/plain
+#    AddOutputFilterByType DEFLATE text/vcard
+#    AddOutputFilterByType DEFLATE text/vnd.rim.location.xloc
+#    AddOutputFilterByType DEFLATE text/vtt
+#    AddOutputFilterByType DEFLATE text/x-component
+#    AddOutputFilterByType DEFLATE text/x-cross-domain-policy
+#    AddOutputFilterByType DEFLATE text/xml
+#
+#    # Remove browser bugs (only needed for really old browsers)
+#    BrowserMatch ^Mozilla/4 gzip-only-text/html
+#    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+#    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+#    Header append Vary User-Agent
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Security                                                            |
+# ----------------------------------------------------------------------
+# https://httpd.apache.org/docs/current/mod/mod_headers.html
+
+#<IfModule mod_headers.c>
+#    # Prevent MIME-sniffing a response away from the declared content-type.
+#    Header set X-Content-Type-Options "nosniff"
+#
+#    # Prevent the site from being rendered within a frame or iframe.
+#    Header set X-Frame-Options "SAMEORIGIN"
+#
+#    # Prevent Internet Explorer from MIME-sniffing a response away from the declared content-type.
+#    Header set X-Content-Type-Options "nosniff"
+#
+#    # Prevent Internet Explorer from opening downloaded files in the context of the attacker's site.
+#    Header set X-Download-Options "noopen"
+#
+#    # Prevent Internet Explorer from executing downloads in your site's context.
+#    Header set X-Permitted-Cross-Domain-Policies "none"
+#
+#    # Prevent some cross-site scripting attacks.
+#    Header set X-XSS-Protection "1; mode=block"
+#
+#    # Prevent clickjacking attacks.
+#    Header set X-Frame-Options "SAMEORIGIN"
+#
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Other                                                               |
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but with a trailing slash.    |
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{REQUEST_URI} !^/$
+#     RewriteCond %{REQUEST_URI} !/$
+#     RewriteRule ^(.*)$ %{REQUEST_URI}/ [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but without a trailing slash. |
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{REQUEST_URI} !^/$
+#     RewriteCond %{REQUEST_URI} /$
+#     RewriteRule ^(.*)$ %{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but with the `www.` prefix.   |
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTP_HOST} !^www\. [NC]
+#     RewriteRule ^(.*)$ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but without the `www.` prefix.|
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+#     RewriteRule ^(.*)$ http://%1%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but with the `https` protocol.|
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but with the `http` protocol. |
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} on
+#     RewriteRule ^(.*)$ http://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but with the `www.` prefix and|
+# | the `https` protocol.                                              |
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteCond %{HTTP_HOST} !^www\. [NC]
+#     RewriteRule ^(.*)$ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Redirections                                                       |
+# ----------------------------------------------------------------------
+# | Redirect all requests to the same URL but without the `www.` prefix |
+# | and with the `https` protocol.                                      |
+# |                                                                    |
+# | This is a good practice for SEO purposes, as it prevents duplicate
+# | content issues.                                                    |
+# |                                                                    |
+# | https://moz.com/learn/seo/duplicate-content                           |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+#     RewriteRule ^(.*)$ https://%1%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Custom Redirections                                                      |
+# ----------------------------------------------------------------------
+
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{REQUEST_URI} ^/old-page.html$
+#     RewriteRule ^(.*)$ /new-page.html [R=301,L]
+# </IfModule>
+
+# ----------------------------------------------------------------------
+# | Custom Redirections                                                      |
+# ----------------------------------------------------------------------
+
+#<IfModule mod_rewrite.c>
+#    RewriteEngine On
+#    RewriteCond %{REQUEST_FILENAME} !-d
+#    RewriteCond %{REQUEST_FILENAME} !-f
+#    RewriteRule ^response$ v1/model/responseTest.php$1 [L]
+#    RewriteRule ^charge$ v1/controller/charge.php$1 [L]
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Custom Redirections                                                      |
+# ----------------------------------------------------------------------
+
+#<IfModule mod_rewrite.c>
+#    RewriteEngine On
+#    RewriteCond %{REQUEST_FILENAME} !-d
+#    RewriteCond %{REQUEST_FILENAME} !-f
+#    RewriteRule ^(.*)$ index.php [L]
+#</IfModule>
+
+# ----------------------------------------------------------------------
+# | Custom Redirections                                                      |
+# ----------------------------------------------------------------------
+
+#<IfModule mod_rewrite.c>
+#    RewriteEngine On
+#    RewriteCond %{REQUEST_FILENAME} !-d
+#    RewriteCond %{REQUEST_FILENAME} !-f
+#    RewriteRule ^([^.]+)$ $1.php [NC,L]
+#</IfModule>
+#
+#<IfModule mod_rewrite.c>
+#    RewriteEngine On
+#    RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+#    RewriteRule ^ /%1 [R=301,NE,L]
+#</IfModule>
+
+
+# ----------------------------------------------------------------------
+
+
