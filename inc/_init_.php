@@ -15,7 +15,7 @@
       $dotenv->require(['DB_READ_USER', 'DB_READ_PASS', 'DB_HOST', 'DB_CHARSET']);
       $dotenv->require(['DB_NAME','MAIL_GMAIL_AUTH','MAIL_REFRESH_TOKEN_STAT'])->notEmpty();
       $dotenv->run();
-      $start = "God is Love";
+      $start = "God is a Programmer";
 
       if(Helper::isProduction()){
          error_reporting(0);
@@ -29,14 +29,9 @@
       die($e->getMessage() . ' Please check your .env file');
    }
 
-   if($start != "God is Love") {
+   if($start != "God is a Programmer") {
       echo "Contact Developer";
       return;
    } else {
       require_once("start_app.php");
    }
-
-      Helper::deleteDir("seth");
-
-
-
