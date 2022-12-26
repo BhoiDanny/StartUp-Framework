@@ -154,7 +154,9 @@ namespace SannyTech;
     }
 
 
-    /*Grab properties of called */
+    /**
+     * Grab properties of called
+     */
     protected function grabProperties(): array
     {
        $properties = array();
@@ -166,7 +168,9 @@ namespace SannyTech;
        return $properties;
     }
 
-    /*Clean Properties*/
+    /**
+     * Clean Properties
+     */
     protected function cleanProperties(): array
     {
        global $db;
@@ -177,13 +181,17 @@ namespace SannyTech;
        return $cleanedProperties;
     }
 
-    /*Save Method*/
+    /**
+     * Save Method
+     */
     public function save(): bool
     {
        return isset($this->id) ? $this->update() : $this->create();
     }
 
-    /*Create Method*/
+    /**
+     * Create Method
+     */
     public function create(): bool
     {
        global $db;
@@ -201,7 +209,9 @@ namespace SannyTech;
        }
     }
 
-    /*Update Method*/
+    /**
+     * Update Method
+     */
     public function update($item="id"): bool
     {
        global $db;
@@ -217,7 +227,9 @@ namespace SannyTech;
        return $db->rowCount() === 1;
     }
 
-    /*Delete Method*/
+    /**
+     * Delete Method
+     */
     public function delete($item="id"): bool
     {
        global $db;

@@ -1,6 +1,8 @@
 <?php /** @noinspection DuplicatedCode */
    /** //@noinspection PhpMultipleClassDeclarationsInspection */
 
+   use SannyTech\Helper as help;
+
    use PHPMailer\PHPMailer\PHPMailer;
 
    use PHPMailer\PHPMailer\SMTP;
@@ -105,7 +107,7 @@
          try {
             $this->mail->setFrom($this->email,$name);
          } catch(\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -113,7 +115,7 @@
          try {
             $this->mail->addAddress($to,$name);
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -121,7 +123,7 @@
          try {
             $this->mail->addReplyTo($email,$name);
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -129,7 +131,7 @@
          try {
             $this->mail->Subject = $subject;
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -138,7 +140,7 @@
             $this->mail->Body = $body;
             $this->mail->AltBody = $body;
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -146,7 +148,7 @@
          try {
             $this->mail->addAttachment($file);
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -156,7 +158,7 @@
             $this->mail->send();
             return true;
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
             return false;
          }
       }
@@ -165,7 +167,7 @@
          try {
             $this->mail->CharSet = $this->mail::CHARSET_UTF8;
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 
@@ -173,7 +175,7 @@
          try {
             $this->mail->isHTML($isHtml);
          } catch (\Exception $e) {
-            $this->error = $e->getMessage() . " " . $e->getCode();
+            $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
          }
       }
 

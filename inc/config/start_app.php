@@ -7,7 +7,7 @@
 
    ob_start();
 
-   $db = new DB(true);
+   //$db = new DB(true);
    $session = new Session();
    $message = $session->message();
 

@@ -3,7 +3,7 @@
    use SannyTech\Dot;
    use SannyTech\Helper;
 
-   $root = dirname(__DIR__ . '/.');
+   $root = dirname(__DIR__ . '/');
    $baseDir = dirname($root);
    $start = "";
    require_once($baseDir . '/vendor/autoload.php');

@@ -8,11 +8,13 @@
         "ext-curl": "*",
         "ext-json": "*",
         "phpmailer/phpmailer": "^6.6",
-        "league/oauth2-google": "^4.0"
+        "league/oauth2-google": "^4.0",
+        "nesbot/carbon": "^2.63",
+        "tinify/tinify": "^1.6"
     },
     "autoload": {
         "psr-4": {
-            "SannyTech\\": "inc/classes/"
+            "SannyTech\\": "Helpers/SannyTech/"
         }
     },
     "authors": [

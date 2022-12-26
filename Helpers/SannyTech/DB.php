@@ -2,6 +2,7 @@
 
    namespace SannyTech;
 
+   use SannyTech\Helper as help;
    use Exception;
    use PDO;
    use PDOException;
@@ -36,25 +37,25 @@
        */
       public function __construct(bool $connection = false)
       {
-         if(Helper::env('DB_MODEL') == 'sqlite') {
-            if(!file_exists(Helper::env('SQLITE_DB_DIR'))) {
-               if(Helper::createDir(Helper::env('SQLITE_DB_DIR'))) {
-                  Helper::createFile(Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME'));
+         if(help::env('DB_MODEL') == 'sqlite') {
+            if(!file_exists(help::env('SQLITE_DB_DIR'))) {
+               if(help::createDir(help::env('SQLITE_DB_DIR'))) {
+                  help::createFile(help::env('SQLITE_DB_DIR') . 'DB.php/' . help::env('DB_NAME'));
                }
             } else {
-               if(!file_exists(Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME'))) {
-                  if(Helper::createFile(Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME'))){
-                     $this->dsn = "sqlite:" . Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME');
+               if(!file_exists(help::env('SQLITE_DB_DIR') . 'DB.php/' . help::env('DB_NAME'))) {
+                  if(help::createFile(help::env('SQLITE_DB_DIR') . 'DB.php/' . help::env('DB_NAME'))){
+                     $this->dsn = "sqlite:" . help::env('SQLITE_DB_DIR') . '/' . help::env('DB_NAME');
                      $this->connect();
                   }
                } else {
-                  $this->dsn = "sqlite:" . Helper::env('SQLITE_DB_DIR') . '/' . Helper::env('DB_NAME');
+                  $this->dsn = "sqlite:" . help::env('SQLITE_DB_DIR') . '/' . help::env('DB_NAME');
                   $this->connect();
                }
             }
 
          } else {
-            $this->dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName};charset={$this->charset}";
+            $this->dsn = "mysql:host=$this->host;port=$this->port;dbname=$this->dbName;charset=$this->charset";
             if(!$connection) {
                $this->readConnect();
             } else {
