@@ -13,16 +13,27 @@
        */
       public static function isProduction(): bool
       {
-         if(self::env('APP_ENV') == 'production') {
+         if(self::env('APP_ENV') == 'production' || self::env('APP_ENV') == 'prod') {
             return true;
          } else {
             return false;
          }
       }
 
-      public static function productionErrorPage()
+      public static function productionErrorPage($page)
       {
-         return require_once 'manager/errors/production.php';
+         return require_once $page;
+      }
+
+      public static function productionErrorLog(
+         mixed $error,
+         string $destination='logs/error.log',
+         int $type= 3,
+         string $message = "",
+      ):void
+      {
+         $log = 'Date: [' . date('Y-m-d H:i:s') . "]" . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
+         error_log($log, $type, $destination);
       }
 
       /**
@@ -846,12 +857,12 @@
        */
       public static function logError(
          Exception $error,
+         string $destination='logs/exceptions.log',
+         int $type=3,
          string $message = '',
-         int $type=0,
-         string $destination='error.log'
       ):void
       {
-         $log = 'Error: ' . date('Y-m-d H:i:s') . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
+         $log = 'Date: [' . date('Y-m-d H:i:s') . "]" . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
          error_log($log, $type, $destination);
       }
 

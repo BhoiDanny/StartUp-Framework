@@ -300,6 +300,121 @@
          $this->db = null;
       }
 
+
+
+      /**
+       * Import a SQL file
+       * @param $file
+       * The file to import
+       * @return bool
+       */
+      public function restore($file): bool
+      {
+         $sql = file_get_contents($file);
+         $content = explode(';', $sql);
+
+         foreach($content as $query) {
+            $query = trim($query);
+            if(!empty($query)) {
+               try {
+                  $this->db->prepare($query)->execute();
+               } catch (PDOException $e) {
+                  $this->error = $e->getMessage();
+                  return false;
+               }
+            }
+         }
+         return true;
+      }
+
+      /**
+       * Export the database to a SQL file
+       * @param $file
+       * The name of the file to export to
+       * @param bool $dbDrop
+       * Whether to include the DROP DATABASE statement
+       * @return bool
+       */
+      public function backup($file, $dbDrop = false): bool
+      {
+         # Get all the tables
+         $tables = $this->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+         # Prepare the SQL script
+         $sql = '-- Database Backup --' . PHP_EOL . PHP_EOL;
+         $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
+         $sql .= '-- Host: ' . $this->host . PHP_EOL;
+         $sql .= '-- Generation Time: ' . date('M j, Y \a\t g:i A') . PHP_EOL;
+         $sql .= '-- Server version: ' . $this->db->getAttribute(PDO::ATTR_SERVER_VERSION) . PHP_EOL;
+         $sql .= '-- PHP Version: ' . phpversion() . PHP_EOL . PHP_EOL;
+         $sql .= '-- Database: `' . help::env('DB_NAME') . '`' . PHP_EOL . PHP_EOL;
+         $sql .= '-- Project: ' . help::env('APP_NAME') . PHP_EOL;
+         $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
+         $sql .= '/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;' . PHP_EOL;
+         $sql .= '/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;' . PHP_EOL . PHP_EOL;
+         $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
+
+         # If we want to include the DROP DATABASE statement
+         if($dbDrop) {
+            $sql .= '--' . PHP_EOL;
+            $sql .= '-- Drop the database' . PHP_EOL;
+            $sql .= '--' . PHP_EOL . PHP_EOL;
+            $sql .= 'DROP DATABASE IF EXISTS `' . help::env('DB_NAME') . '`;' . PHP_EOL . PHP_EOL;
+            $sql .= 'CREATE DATABASE IF NOT EXISTS `' . help::env('DB_NAME') . '`;' . PHP_EOL . PHP_EOL;
+            $sql .= 'USE `' . help::env('DB_NAME') . '`;' . PHP_EOL . PHP_EOL;
+            $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
+         }
+
+         # Cycle through each table
+         foreach($tables as $table) {
+            $sql .= 'DROP TABLE IF EXISTS ' . $table . ';';
+            # Get the table structure
+            $create = $this->query('SHOW CREATE TABLE ' . $table)->fetch(PDO::FETCH_ASSOC);
+            # Add the table structure to the SQL script
+            $sql .= "\n\n" . $create['Create Table'] . ";\n\n";
+
+            # Get the table data
+            $data = $this->query('SELECT * FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
+            # Cycle through each row
+            foreach($data as $row) {
+               # Prepare the SQL statement
+               $sql .= 'INSERT INTO ' . $table . ' VALUES (';
+               # Cycle through each field
+               foreach($row as $value) {
+                  # Add the field value to the SQL statement
+                  $value = addslashes($value);
+                  # Escape any apostrophes
+                  $value = str_replace("\n", "\\n", $value);
+                  if(!isset($value)) {
+                     $sql .= "''";
+                  } else {
+                     $sql .= "'" . $value . "'";
+                  }
+                  $sql .= ',';
+               }
+               # Remove the last comma
+               $sql = substr($sql, 0, -1);
+               $sql .= ");\n";
+            }
+            # Add a new line
+            $sql .= "\n\n";
+            $sql .= '-- --------------------------------------------------------' . PHP_EOL;
+            $sql .= '-- End of data for table `' . $table . '`' . PHP_EOL;
+            $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
+
+         }
+         $sql .= '/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;' . PHP_EOL;
+         $sql .= '/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;' . PHP_EOL;
+         $sql .= '/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;' . PHP_EOL;
+         # Save the SQL script to a backup file
+         try {
+            file_put_contents($file, $sql);
+         } catch (Exception $e) {
+            $this->error = $e->getMessage();
+            return false;
+         }
+         return true;
+      }
+
       /**
        * Destructor
        */
