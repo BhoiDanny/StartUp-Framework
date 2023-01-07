@@ -307,20 +307,25 @@
        * @param $file
        * The file to import
        * @return bool
+       * @throws Exception
        */
       public function restore($file): bool
       {
-         $sql = file_get_contents($file);
-         $content = explode(';', $sql);
 
-         foreach($content as $query) {
-            $query = trim($query);
-            if(!empty($query)) {
-               try {
-                  $this->db->prepare($query)->execute();
-               } catch (PDOException $e) {
-                  $this->error = $e->getMessage();
-                  return false;
+         if(!file_exists($file)) {
+            throw new Exception("File does not exist");
+         } else {
+            $sql = file_get_contents($file);
+            $content = explode(';', $sql);
+            foreach($content as $query) {
+               $query = trim($query);
+               if(!empty($query)) {
+                  try {
+                     $this->db->prepare($query)->execute();
+                  } catch (PDOException $e) {
+                     $this->error = $e->getMessage();
+                     return false;
+                  }
                }
             }
          }
@@ -331,14 +336,22 @@
        * Export the database to a SQL file
        * @param $file
        * The name of the file to export to
+       * @param bool $dbTablePick
+       * Pick specific tables to export
+       * @param array $dbTable
+       * The tables to export
        * @param bool $dbDrop
        * Whether to include the DROP DATABASE statement
        * @return bool
        */
-      public function backup($file, $dbDrop = false): bool
+      public function backup($file, bool $dbTablePick = false, array $dbTable = [], bool $dbDrop = false): bool
       {
          # Get all the tables
          $tables = $this->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+         if($dbTablePick) {
+            $tables = array_intersect($tables, $dbTable);
+         }
+
          # Prepare the SQL script
          $sql = '-- Database Backup --' . PHP_EOL . PHP_EOL;
          $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
@@ -350,7 +363,8 @@
          $sql .= '-- Project: ' . help::env('APP_NAME') . PHP_EOL;
          $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
          $sql .= '/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;' . PHP_EOL;
-         $sql .= '/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;' . PHP_EOL . PHP_EOL;
+         $sql .= '/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;' . PHP_EOL;
+         $sql .= "/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;" . PHP_EOL . PHP_EOL;
          $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
 
          # If we want to include the DROP DATABASE statement
@@ -367,6 +381,9 @@
          # Cycle through each table
          foreach($tables as $table) {
             $sql .= 'DROP TABLE IF EXISTS ' . $table . ';';
+
+            # Select the tables based on the table names
+
             # Get the table structure
             $create = $this->query('SHOW CREATE TABLE ' . $table)->fetch(PDO::FETCH_ASSOC);
             # Add the table structure to the SQL script
@@ -407,7 +424,9 @@
          $sql .= '/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;' . PHP_EOL;
          # Save the SQL script to a backup file
          try {
-            file_put_contents($file, $sql);
+            if(!file_put_contents($file, $sql)) {
+               throw new Exception('Could not save the SQL file.');
+            }
          } catch (Exception $e) {
             $this->error = $e->getMessage();
             return false;
