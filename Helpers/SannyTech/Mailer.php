@@ -67,13 +67,17 @@
                );
 
                if(\SannyTech\Helper::env('MAIL_REFRESH_TOKEN_STAT')) {
-                  $grant = new static::$RefreshToken();
-
-                  $token = $provider->getAccessToken(
-                     $grant, [
-                        'refresh_token' => $this->refreshToken,
-                     ]
-                  );
+                  try {
+                     $grant = new static::$RefreshToken();
+                     $token = $provider->getAccessToken(
+                        $grant, [
+                           'refresh_token' => $this->refreshToken,
+                        ]
+                     );
+                  } catch (\Exception $ex) {
+                     $this->error = "Check Internet Connection";
+                     return;
+                  }
                }
 
                $this->mail->setOAuth(
@@ -155,8 +159,7 @@
       public function send(): bool
       {
          try {
-            $this->mail->send();
-            return true;
+            return $this->mail->send();
          } catch (\Exception $e) {
             $this->error = $e->getMessage() . " Mailer.php" . $e->getCode();
             return false;
