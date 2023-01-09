@@ -436,8 +436,10 @@
 
       /**
        * Backup the database to csv file type
-       * @param $file
-       * The name of the file to export to
+       * @param $filename
+       * The name of the file to export to when $combine is true
+       * @param bool $combine
+       * Whether to combine all tables into one file
        * @param bool $dbTablePick
        * Pick specific tables to export
        * @param array $dbTable
@@ -445,7 +447,7 @@
        * @return bool
        * @throws Exception
        */
-      public function backupCsvType($file, bool $dbTablePick = false, array $dbTable = []): bool
+      public function backupCsvType($filename,bool $combine = true, bool $dbTablePick = false, array $dbTable = []): bool
       {
          # get all the tables
          $tables = $this->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
@@ -455,52 +457,97 @@
 
          # Prepare the CSV script
          $csv = '';
-         # Cycle through each table
-         foreach($tables as $table) {
-            # Get the table data
-            $data = $this->query('SELECT * FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
 
-            # Add Column names to the CSV script
-            $csv .= implode(',', array_keys($data[0])) . "\n";
+         # If combine is true
+         if($combine) {
+            # Cycle through each table
+            foreach($tables as $table) {
+               # Get the table data
+               $data = $this->query('SELECT * FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
 
-            # Cycle through each row
-            foreach($data as $row) {
-               # Cycle through each field
+               # Add Column names to the CSV script
+               $csv .= implode(',', array_keys($data[0])) . "\n";
 
-               /*$csv .= implode(',', array_keys($row)) . PHP_EOL;
-               # Add the field value to the CSV script
-               $csv .= implode(',', $row) . PHP_EOL;*/
+               # Cycle through each row
+               foreach($data as $row) {
+                  # Cycle through each field
 
-               foreach($row as $value) {
-                  # Add the field value to the CSV statement with column names
-                  $value = addslashes($value);
-                  # Escape any apostrophes
-                  $value = str_replace("\n", "\\n", $value);
-                  if(!isset($value)) {
-                     $csv .= "''";
-                  } else {
-                     $csv .= "'" . $value . "'";
+                  foreach($row as $value) {
+                     # Add the field value to the CSV statement with column names
+                     $value = addslashes($value);
+                     # Escape any apostrophes
+                     $value = str_replace("\n", "\\n", $value);
+                     if(!isset($value)) {
+                        $csv .= "''";
+                     } else {
+                        $csv .= "'" . $value . "'";
+                     }
+                     $csv .= ',';
+
                   }
-                  $csv .= ',';
+                  # Remove the last comma
+                  $csv = substr($csv, 0, -1);
+                  $csv .= "\n";
+               }
+               # Add a new line
+               $csv .= "\n\n";
+            }
+
+            # Save the CSV script to a backup file
+            try {
+               if(!file_put_contents(help::env('DB_BACKUP_DIR').'/'.$filename . '.csv', $csv)) {
+                  throw new Exception('Could not save the CSV file.');
+               }
+            } catch (Exception $e) {
+               $this->error = $e->getMessage();
+               return false;
+            }
+         } else {
+            # export each table to a separate file with the table name
+
+            # Cycle through each table
+            foreach($tables as $table) {
+               # Get the Table data
+               $data = $this->query('SELECT * FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
+
+               $csv = '';
+
+               # Add Column names to the CSV script
+               $csv .= implode(',', array_keys($data[0])) . "\n";
+
+               # Cycle through each row
+               foreach($data as $row) {
+                  # Cycle through each field
+                  foreach($row as $value) {
+                     # Add the field value to the CSV statement with column names
+                     $value = addslashes($value);
+                     # Escape any apostrophes
+                     $value = str_replace("\n", "\\n", $value);
+                     if(!isset($value)) {
+                        $csv .= "''";
+                     } else {
+                        $csv .= "'" . $value . "'";
+                     }
+                     $csv .= ',';
+                  }
+                  # Remove the last comma
+                  $csv = substr($csv, 0, -1);
+                  $csv .= "\n";
+
+                  try {
+                     if(!file_put_contents(help::env('DB_BACKUP_DIR') . '/' .$table . '.csv', $csv)) {
+                        throw new Exception('Could not save the CSV file.');
+                     }
+                  } catch (Exception $e) {
+                     $this->error = $e->getMessage();
+                     return false;
+                  }
 
                }
-               # Remove the last comma
-               $csv = substr($csv, 0, -1);
-               $csv .= "\n";
             }
-            # Add a new line
-            $csv .= "\n\n";
+
          }
 
-         # Save the CSV script to a backup file
-         try {
-            if(!file_put_contents($file, $csv)) {
-               throw new Exception('Could not save the CSV file.');
-            }
-         } catch (Exception $e) {
-            $this->error = $e->getMessage();
-            return false;
-         }
          return true;
       }
 
