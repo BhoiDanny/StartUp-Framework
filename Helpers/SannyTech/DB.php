@@ -319,6 +319,10 @@
                $query = trim($query);
                if(!empty($query)) {
                   try {
+                     # Disable foreign key checks
+                     $this->db->prepare("SET FOREIGN_KEY_CHECKS = 0")->execute();
+                     $this->db->prepare("SET UNIQUE_CHECKS = 0")->execute();
+                     $this->db->prepare("SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO'")->execute();
                      $this->db->prepare($query)->execute();
                   } catch (PDOException $e) {
                      $this->error = $e->getMessage();
@@ -360,10 +364,10 @@
          $sql .= '-- Database: `' . help::env('DB_NAME') . '`' . PHP_EOL . PHP_EOL;
          $sql .= '-- Project: ' . help::env('APP_NAME') . PHP_EOL;
          $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
-         $sql .= '/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;' . PHP_EOL;
-         $sql .= '/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;' . PHP_EOL;
-         $sql .= "/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;" . PHP_EOL . PHP_EOL;
-         $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
+         #$sql .= '/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;' . PHP_EOL;
+         #$sql .= '/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;' . PHP_EOL;
+         #$sql .= "/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;" . PHP_EOL . PHP_EOL;
+         #$sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
 
          # If we want to include the DROP DATABASE statement
          if($dbDrop) {
@@ -417,9 +421,9 @@
             $sql .= '-- --------------------------------------------------------' . PHP_EOL . PHP_EOL;
 
          }
-         $sql .= '/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;' . PHP_EOL;
-         $sql .= '/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;' . PHP_EOL;
-         $sql .= '/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;' . PHP_EOL;
+         #$sql .= '/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;' . PHP_EOL;
+         #$sql .= '/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;' . PHP_EOL;
+         #$sql .= '/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;' . PHP_EOL;
          # Save the SQL script to a backup file
          try {
             if(!file_put_contents(help::env('DB_BACKUP_DIR').'/'.$file.'.sql', $sql)) {
