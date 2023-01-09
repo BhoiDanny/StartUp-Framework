@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUndefinedConstantInspection */
+<?php /** @noinspection .PhpUndefinedConstantInspection */
 
    namespace SannyTech;
 
@@ -19,7 +19,7 @@
       private   $dbName      = DB_NAME;
       private   $charset     = DB_CHARSET;
       protected mixed $db;
-      protected mixed $error;
+      protected mixed $error = null;
       protected string $dsn;
       protected mixed $stmt;
 
@@ -300,8 +300,6 @@
          $this->db = null;
       }
 
-
-
       /**
        * Import a SQL file
        * @param $file
@@ -424,7 +422,7 @@
          $sql .= '/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;' . PHP_EOL;
          # Save the SQL script to a backup file
          try {
-            if(!file_put_contents($file, $sql)) {
+            if(!file_put_contents(help::env('DB_BACKUP_DIR').'/'.$file, $sql)) {
                throw new Exception('Could not save the SQL file.');
             }
          } catch (Exception $e) {
@@ -536,9 +534,9 @@
                      # Escape any apostrophes
                      $value = str_replace("\n", "\\n", $value);
                      if(!isset($value)) {
-                        $csv .= "''";
+                        $csv .= " ";
                      } else {
-                        $csv .= "'" . $value . "'";
+                        $csv .= " " . $value . " ";
                      }
                      $csv .= ',';
 
