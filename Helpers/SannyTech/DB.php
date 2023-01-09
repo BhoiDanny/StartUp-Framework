@@ -422,7 +422,7 @@
          $sql .= '/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;' . PHP_EOL;
          # Save the SQL script to a backup file
          try {
-            if(!file_put_contents(help::env('DB_BACKUP_DIR').'/'.$file, $sql)) {
+            if(!file_put_contents(help::env('DB_BACKUP_DIR').'/'.$file.'.sql', $sql)) {
                throw new Exception('Could not save the SQL file.');
             }
          } catch (Exception $e) {
