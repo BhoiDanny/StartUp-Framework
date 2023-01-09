@@ -451,7 +451,16 @@
       {
          # get all the tables
          $tables = $this->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-         if($dbTablePick) {
+
+         # disable foreign key checks
+         /*$this->query('SET FOREIGN_KEY_CHECKS = 0');
+         $this->query('SET UNIQUE_CHECKS = 0');
+         $this->query('SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO"');*/
+
+         $count = count($tables);
+         $i = 0;
+
+         if($dbTablePick && !empty($dbTable)) {
             $tables = array_intersect($tables, $dbTable);
          }
 
@@ -464,23 +473,27 @@
             foreach($tables as $table) {
                # Get the table data
                $data = $this->query('SELECT * FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
+               $columns = $this->query('SHOW COLUMNS FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
+
+               # Add the table name to the CSV script
+               $csv .= 'Table: ' . $table . PHP_EOL;
 
                # Add Column names to the CSV script
-               $csv .= implode(',', array_keys($data[0])) . "\n";
+               /*$csv .= join(',', array_keys($data[0])) . PHP_EOL;*/
+               $csv .= join(',', array_column($columns, 'Field')) . PHP_EOL;
 
                # Cycle through each row
                foreach($data as $row) {
                   # Cycle through each field
-
                   foreach($row as $value) {
                      # Add the field value to the CSV statement with column names
                      $value = addslashes($value);
                      # Escape any apostrophes
                      $value = str_replace("\n", "\\n", $value);
                      if(!isset($value)) {
-                        $csv .= "''";
+                        $csv .= " ";
                      } else {
-                        $csv .= "'" . $value . "'";
+                        $csv .= " " . $value . " ";
                      }
                      $csv .= ',';
 
@@ -505,15 +518,14 @@
          } else {
             # export each table to a separate file with the table name
 
-            # Cycle through each table
-            foreach($tables as $table) {
-               # Get the Table data
-               $data = $this->query('SELECT * FROM ' . $table)->fetchAll(PDO::FETCH_ASSOC);
-
+            while($i < $count) {
                $csv = '';
+               $data = $this->query('SELECT * FROM ' . $tables[$i])->fetchAll(PDO::FETCH_ASSOC);
+               $columns = $this->query('SHOW COLUMNS FROM ' . $tables[$i])->fetchAll(PDO::FETCH_ASSOC);
 
                # Add Column names to the CSV script
-               $csv .= implode(',', array_keys($data[0])) . "\n";
+               /*$csv .= join(',', array_keys($data[0])) . PHP_EOL;*/
+               $csv .= join(',', array_column($columns, 'Field')) . PHP_EOL;
 
                # Cycle through each row
                foreach($data as $row) {
@@ -529,21 +541,25 @@
                         $csv .= "'" . $value . "'";
                      }
                      $csv .= ',';
+
                   }
                   # Remove the last comma
                   $csv = substr($csv, 0, -1);
                   $csv .= "\n";
-
-                  try {
-                     if(!file_put_contents(help::env('DB_BACKUP_DIR') . '/' .$table . '.csv', $csv)) {
-                        throw new Exception('Could not save the CSV file.');
-                     }
-                  } catch (Exception $e) {
-                     $this->error = $e->getMessage();
-                     return false;
-                  }
-
                }
+               # Add a new line
+               $csv .= "\n\n";
+
+               # Save the CSV script to a backup file
+               try {
+                  if(!file_put_contents(help::env('DB_BACKUP_DIR').'/'.$tables[$i] . '.csv', $csv)) {
+                     throw new Exception('Could not save the CSV file.');
+                  }
+               } catch (Exception $e) {
+                  $this->error = $e->getMessage();
+                  return false;
+               }
+               $i++;
             }
 
          }
