@@ -866,4 +866,14 @@
          error_log($log, $type, $destination);
       }
 
+      /**
+       * Changes the X-Powered-By
+       * @param string $powered
+       * @return void
+       */
+      public static function setPoweredBy(string $powered=''): void
+      {
+         header('X-Powered-By: ' . $powered);
+      }
+
    }
