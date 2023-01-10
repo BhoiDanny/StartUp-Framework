@@ -1,4 +1,6 @@
-<?php /** @noinspection .PhpUndefinedConstantInspection */
+<?php /** @noinspection PhpMultipleClassesDeclarationsInOneFile */
+
+   /** @noinspection .PhpUndefinedConstantInspection */
 
    namespace SannyTech;
 
@@ -7,6 +9,7 @@
    use PDO;
    use PDOException;
 
+   class DatabaseException extends Exception {}
    class DB
    {
 
