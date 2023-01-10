@@ -18,6 +18,7 @@
          session_name(Helper::env('SESSION_NAME'));
          session_start();
          $this->checkLogin();
+         $this->checkLifetime();
          $this->checkMessage();
          $this->checkSavedId();
          $this->checkCsrfToken();
@@ -100,6 +101,17 @@
             return true;
          } else {
             return false;
+         }
+      }
+
+      /**
+       * Check Session lifetime
+       * @return void
+       */
+      public function checkLifetime(): void
+      {
+         if($this->isExpired()) {
+            $this->signOut();
          }
       }
 
@@ -187,7 +199,7 @@
             $this->csrfToken = $_SESSION['csrfToken'];
             unset($_SESSION['csrfToken']);
          } else {
-            $this->csrfToken = "";
+            $this->csrfToken = $this->csrfToken();
          }
       }
 
