@@ -8,6 +8,7 @@
       public string $message;
       private bool $signedIn = false;
       public mixed $savedId;
+      public mixed $csrfToken;
 
       /**Session Constructor
        * @return void
@@ -19,6 +20,7 @@
          $this->checkLogin();
          $this->checkMessage();
          $this->checkSavedId();
+         $this->checkCsrfToken();
       }
 
       /**
@@ -27,7 +29,7 @@
        */
       public function isSignedIn(): bool
       {
-          return $this->signedIn;
+         return $this->signedIn;
       }
 
       /**
@@ -158,6 +160,50 @@
       }
 
       /*New Methods*/
+
+      /**
+       * CSRF Token
+       * @return string
+       */
+      public function csrfToken(): string
+      {
+         if(!isset($_SESSION['csrfToken'])) {
+            try {
+               return $_SESSION['csrfToken'] = bin2hex(random_bytes(32));
+            } catch (\Exception $e) {
+               echo($e->getMessage());
+            }
+         }
+         return $this->csrfToken;
+      }
+
+      /**
+       * Check CSRF Token
+       * @return void
+       */
+      public function checkCsrfToken(): void
+      {
+         if(isset($_SESSION['csrfToken'])) {
+            $this->csrfToken = $_SESSION['csrfToken'];
+            unset($_SESSION['csrfToken']);
+         } else {
+            $this->csrfToken = "";
+         }
+      }
+
+      /**
+       * Check if CSRF Token is valid
+       * @param string $token
+       * @return bool
+       */
+      public function isValidCsrfToken(string $token): bool
+      {
+         if($token === $this->csrfToken) {
+            return true;
+         } else {
+            return false;
+         }
+      }
 
 
 
