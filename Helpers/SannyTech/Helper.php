@@ -887,7 +887,7 @@
        */
       public static function setServerSignature(string $signature=''): void
       {
-         header('Server: ' . $signature);
+         ini_set('ServerSignature', $signature);
       }
 
    }
