@@ -415,14 +415,18 @@
       }
 
 
-      /*Make myy app more secured*/
-      /*Secure */
+      /**
+       * Make data safe to use in a query
+       * @param $data
+       * @return string
+       */
       public static function secure($data): string
       {
          $data = trim($data);
          $data = stripslashes($data);
          return htmlspecialchars($data);
       }
+
 
       /*Encrypt out going post request*/
       public static function encryptData($data): string
@@ -732,9 +736,9 @@
        * Expose Php in Ini
        * @return void
        */
-      public function exposePhp(): void
+      public static function exposePhp(string $value = 'Off'): void
       {
-         ini_set('expose_php', 'On');
+         ini_set('expose_php', $value);
       }
 
       /**
@@ -858,11 +862,11 @@
       public static function logError(
          Exception $error,
          string $destination='logs/exceptions.log',
-         int $type=3,
+         int $type= 3,
          string $message = '',
       ):void
       {
-         $log = 'Date: [' . date('Y-m-d H:i:s') . "]" . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
+         $log = 'Date: ' . date('Y-m-d H:i:s') . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
          error_log($log, $type, $destination);
       }
 
@@ -874,6 +878,16 @@
       public static function setPoweredBy(string $powered=''): void
       {
          header('X-Powered-By: ' . $powered);
+      }
+
+      /**
+       * Set Server Signature
+       * @param string $signature
+       * @return void
+       */
+      public static function setServerSignature(string $signature=''): void
+      {
+         header('Server: ' . $signature);
       }
 
    }
