@@ -4,9 +4,9 @@
 
    class Cookie
    {
-      public $user_id;
-      private $signedIn = false;
-      private $name;
+      private mixed $user_id;
+      private bool $signedIn = false;
+      private mixed $name;
 
       /**
        * Cookie Constructor
@@ -25,6 +25,15 @@
       public function isSignedIn(): bool
       {
          return $this->signedIn;
+      }
+
+      /**
+       * Return the user login in
+       * @return mixed
+       */
+      public function user(): mixed
+      {
+         return $this->user_id;
       }
 
 

@@ -4,11 +4,11 @@
 
    class Session
    {
-      public mixed $user_id;
+      private mixed $user_id;
       public string $message;
       private bool $signedIn = false;
-      public mixed $savedId;
-      public mixed $csrfToken;
+      private mixed $savedId;
+      private mixed $csrfToken;
 
       /**Session Constructor
        * @return void
@@ -18,8 +18,8 @@
          session_name(Helper::env('SESSION_NAME'));
          session_start();
          $this->checkLogin();
-         $this->checkLifetime();
          $this->checkMessage();
+         $this->checkLifetime();
          $this->checkSavedId();
          $this->checkCsrfToken();
       }
@@ -31,6 +31,15 @@
       public function isSignedIn(): bool
       {
          return $this->signedIn;
+      }
+
+      /**
+       * Return the user login in
+       * @return mixed
+       */
+      public function user(): mixed
+      {
+         return $this->user_id;
       }
 
       /**
@@ -88,7 +97,7 @@
        */
       private function getTime(): mixed
       {
-         return $_SESSION['time'];
+         return $_SESSION['time'] ?? false;
       }
 
       /**
@@ -127,6 +136,16 @@
          } else {
             return $this->message;
          }
+      }
+
+      /**
+       * Set Message
+       * @param string $message
+       * @return void
+       */
+      public function setMessage(string $message): void
+      {
+         $this->message = $_SESSION['message'] = $message;
       }
 
       /**
@@ -177,29 +196,30 @@
        * CSRF Token
        * @return string
        */
+      #grepper How to create a CSRF token in PHP
       public function csrfToken(): string
       {
-         if(!isset($_SESSION['csrfToken'])) {
+         if(!isset($_SESSION['csrfToken']) || !empty($_SESSION['csrfToken'])) {
             try {
-               return $_SESSION['csrfToken'] = bin2hex(random_bytes(32));
+               $this->csrfToken = $_SESSION['csrfToken'] = bin2hex(random_bytes(32));
             } catch (\Exception $e) {
-               echo($e->getMessage());
+               echo $e->getMessage();
             }
          }
          return $this->csrfToken;
       }
+      #end grepper
 
       /**
        * Check CSRF Token
        * @return void
        */
-      public function checkCsrfToken(): void
+      private function checkCsrfToken(): void
       {
-         if(isset($_SESSION['csrfToken'])) {
+         if(isset($_SESSION['csrfToken']) && !empty($_SESSION['csrfToken'])) {
             $this->csrfToken = $_SESSION['csrfToken'];
-            unset($_SESSION['csrfToken']);
          } else {
-            $this->csrfToken = $this->csrfToken();
+            $this->csrfToken = "";
          }
       }
 
