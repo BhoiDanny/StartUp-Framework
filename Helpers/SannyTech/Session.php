@@ -196,7 +196,7 @@
        * CSRF Token
        * @return string
        */
-      #grepper How to create a CSRF token in PHP
+      #grepper How to create a CSRF token in PHP in a class
       public function csrfToken(): string
       {
          if(!isset($_SESSION['csrfToken']) || !empty($_SESSION['csrfToken'])) {
