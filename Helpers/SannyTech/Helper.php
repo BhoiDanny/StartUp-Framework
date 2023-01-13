@@ -1,6 +1,6 @@
-<?php
+<?php /** @noinspection PhpIllegalPsrClassPathInspection */
 
-   namespace SannyTech;
+   namespace CodeSter;
 
    use Exception;
    use JetBrains\PhpStorm\NoReturn;
@@ -192,7 +192,10 @@
          return $output;
       }
 
-      /*Encrypt*/
+      /**
+       * @param $string
+       * @return string
+       */
       public static function encrypt($string): string
       {
          $output = false;
@@ -207,7 +210,14 @@
          return base64_encode($output);
       }
 
-      /*EncryptValue*/
+      /**
+       * Encrypts a value using the given key.
+       * @param $data
+       * The value to encrypt.
+       * @param $encrypt_key
+       * The key to use for encryption.
+       * @return string
+       */
       public static function encryptValue($data, $encrypt_key): string
       {
          $output = false;
@@ -222,7 +232,12 @@
          return base64_encode($output);
       }
 
-      /*Decrypt*/
+      /**
+       * Decrypt a string using the APP_SECRET_KEY
+       * @param $string
+       * The encrypted string
+       * @return string
+       */
       public static function decrypt($string): string
       {
          $encrypt_method = "AES-256-CBC";
@@ -888,6 +903,21 @@
       public static function setServerSignature(string $signature=''): void
       {
          ini_set('ServerSignature', $signature);
+      }
+
+      /**
+       * Replace String in File Content
+       * @param string $file
+       * @param array $replace
+       * @return array|false|string|string[]
+       */
+      public static function replaceStringInFile(string $file, array $replace): array|bool|string
+      {
+         $content = file_get_contents($file);
+         foreach($replace as $search => $value) {
+            $content = str_replace($search, $value, $content);
+         }
+         return $content;
       }
 
    }
