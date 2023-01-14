@@ -32,7 +32,9 @@
          string $message = "",
       ):void
       {
-         $log = 'Date: [' . date('Y-m-d H:i:s') . "]" . PHP_EOL . $message . PHP_EOL . $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL . '-------------------------' . PHP_EOL;
+         $log = 'Date: [' . date('Y-m-d H:i:s') . "]" . PHP_EOL . $message . PHP_EOL .
+            $error->getLine() . PHP_EOL . $error->getMessage() . PHP_EOL . $error->getFile() . PHP_EOL .
+            $error->getTrace() . PHP_EOL . '-------------------------' . PHP_EOL;
          error_log($log, $type, $destination);
       }
 
@@ -637,7 +639,7 @@
        */
       public static function hashString(string $string='') : string
       {
-         return password_hash($string, PASSWORD_BCRYPT, array('cost' => 10));
+         return password_hash($string, PASSWORD_BCRYPT, array('cost' => 12));
       }
 
       /**
@@ -729,6 +731,22 @@
          $email = explode('@', $email);
          $email = end($email);
          if($email == $provider) {
+            return true;
+         }
+         return false;
+      }
+
+      /**
+       * only accept email from specific providers
+       * @param string $email
+       * @param array $providers
+       * @return bool
+       */
+      public static function checkEmailProviders(string $email='', array $providers=[]) : bool
+      {
+         $email = explode('@', $email);
+         $email = end($email);
+         if(in_array($email, $providers)) {
             return true;
          }
          return false;
