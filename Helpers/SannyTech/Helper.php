@@ -1,6 +1,6 @@
 <?php /** @noinspection PhpIllegalPsrClassPathInspection */
 
-   namespace CodeSter;
+   namespace SannyTech;
 
    use Exception;
    use JetBrains\PhpStorm\NoReturn;
