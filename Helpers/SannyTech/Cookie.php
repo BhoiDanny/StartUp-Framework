@@ -1,12 +1,15 @@
-<?php
+<?php /** @noinspection PhpIllegalPsrClassPathInspection */
 
    namespace SannyTech;
 
    class Cookie
    {
       private mixed $user_id;
+      private mixed $admin_id;
       private bool $signedIn = false;
+      private bool $aSignedIn = false;
       private mixed $name;
+      private mixed $aName;
 
       /**
        * Cookie Constructor
@@ -15,7 +18,19 @@
       public function __construct()
       {
          $this->name = Helper::env('COOKIE_NAME');
+         $this->aName = Helper::env('ADMIN_COOKIE_NAME');
          $this->checkLogin();
+         $this->checkAdminLogin();
+      }
+
+      /**
+       * Get Cookie by param
+       * @param $param
+       * @return mixed
+       */
+      public function get($param): mixed
+      {
+         return $_COOKIE[$param];
       }
 
       /**
@@ -26,6 +41,7 @@
       {
          return $this->signedIn;
       }
+
 
       /**
        * Return the user login in
@@ -49,6 +65,7 @@
             setcookie($this->name, $cookie, time() + Helper::env('COOKIE_EXPIRY'), '/');
          }
       }
+
 
       /**
        * SignIn with cookie
@@ -121,6 +138,97 @@
       public function isEmpty(): bool
       {
          return empty($_COOKIE[$this->name]);
+      }
+
+      /*Admin Section*/
+
+      /**
+       * Check if admin is logged in
+       * @return bool
+       */
+      public function isASignedIn(): bool
+      {
+         return $this->aSignedIn;
+      }
+
+      /**
+       * Return the admin login in
+       * @return mixed
+       */
+      public function admin(): mixed
+      {
+         return $this->admin_id;
+      }
+
+
+      /**
+       * Set Admin SignIn cookie
+       * @param $user
+       * @return void
+       */
+      public function setACookie($user): void
+      {
+         if($user) {
+            $cookie = Helper::encrypt($user->id);
+            setcookie($this->aName, $cookie, time() + Helper::env('COOKIE_EXPIRY'), '/');
+         }
+      }
+
+      /**
+       * Set SignIn cookie for admin
+       * @param $admin
+       * @return void
+       */
+      public function aSignIn($admin):void
+      {
+         if($admin) {
+            $this->admin_id = $_SESSION[$this->name] = $admin->id;
+            $this->aSignedIn = true;
+         }
+      }
+
+
+
+      /**
+       * Check if admin is logged in using cookie
+       * @return void
+       */
+      private function checkAdminLogin(): void
+      {
+         if(Helper::cookie($this->aName) !== null) {
+            $cookie = Helper::decrypt(Helper::cookie($this->aName));
+            $this->admin_id = $_SESSION['admin_id'] = $cookie;
+            $this->aSignedIn = true;
+         } else {
+            unset($this->admin_id);
+            $this->aSignedIn = false;
+         }
+      }
+
+      /**
+       * Log admin out using cookie
+       * @return void
+       */
+      public function aSignOut(): void
+      {
+         unset($_SESSION['admin_id']);
+         unset($this->admin_id);
+         $this->aSignedIn = false;
+         $this->destroyCookie($this->aName);
+      }
+
+      /**
+       * Destroy a cookie
+       * @param string $cookieName
+       * @return void
+       */
+      public function aDestroyCookie(string $cookieName): void
+      {
+         $this->aName = $cookieName;
+         if($this->exists()) {
+            unset($_COOKIE[$this->aName]);
+            setcookie($this->aName, '', time() - 3600, '/');
+         }
       }
 
 

@@ -1,12 +1,14 @@
-<?php
+<?php /** @noinspection PhpIllegalPsrClassPathInspection */
 
    namespace SannyTech;
 
    class Session
    {
       private mixed $user_id;
+      private mixed $admin_id;
       public string $message;
       private bool $signedIn = false;
+      private bool $aSignedIn = false;
       private mixed $savedId;
       private mixed $csrfToken;
 
@@ -18,10 +20,21 @@
          session_name(Helper::env('SESSION_NAME'));
          session_start();
          $this->checkLogin();
+         $this->checkALogin();
          $this->checkMessage();
          $this->checkLifetime();
          $this->checkSavedId();
          $this->checkCsrfToken();
+      }
+
+      /**
+       * Get Session by param
+       * @param $param
+       * @return mixed
+       */
+      public function get($param): mixed
+      {
+         return $_SESSION[$param];
       }
 
       /**
@@ -121,6 +134,7 @@
       {
          if($this->isExpired()) {
             $this->signOut();
+            $this->aSignOut();
          }
       }
 
@@ -237,6 +251,83 @@
          }
       }
 
+      /**
+       * Destroy csrf token
+       * @return void
+       */
+      public function destroyCsrfToken(): void
+      {
+         unset($_SESSION['csrfToken']);
+         unset($this->csrfToken);
+      }
+
+      /**
+       * Destroy Session
+       * @return void
+       */
+      public function destroy(): void
+      {
+         session_destroy();
+      }
+
+      /*Admin Section*/
+
+      /**
+       * Check if admin is logged in
+       * @return bool
+       */
+      public function isASignedIn(): bool
+      {
+         return $this->aSignedIn;
+      }
+
+      /**
+       * Return the admin login in
+       * @return mixed
+       */
+      public function admin(): mixed
+      {
+         return $this->admin_id;
+      }
+
+      /**
+       * Sign a admin in
+       * @param $admin
+       * @return void
+       */
+      public function aSignIn($admin): void
+      {
+         if($admin) {
+            $this->admin_id = $_SESSION['admin_id'] = $admin->id;
+            $this->aSignedIn = true;
+            $this->setTime();
+         }
+      }
+
+      /**
+       * Sign a admin out
+       * @return void
+       */
+      public function aSignOut(): void
+      {
+         unset($_SESSION['admin_id']);
+         unset($this->admin_id);
+         $this->aSignedIn = false;
+      }
+
+      /**
+       * Check if admin is logged in
+       */
+      private function checkALogin(): void
+      {
+         if(isset($_SESSION['admin_id'])) {
+            $this->admin_id = $_SESSION['admin_id'];
+            $this->aSignedIn = true;
+         } else {
+            unset($this->admin_id);
+            $this->aSignedIn = false;
+         }
+      }
 
 
    }
